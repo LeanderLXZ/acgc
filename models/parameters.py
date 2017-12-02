@@ -1,5 +1,5 @@
 import preprocess
-from models.models import *
+from models.classifiers import *
 from models import stacking
 from models import prejudge
 from models.sk_grid_search import SKLearnGridSearch

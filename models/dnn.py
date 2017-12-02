@@ -6,7 +6,7 @@ import copy
 import numpy as np
 import tensorflow as tf
 from os.path import isdir
-from models.models import ModelBase
+from models.classifiers import ModelBase
 from models import utils
 from models.cross_validation import CrossValidation
 

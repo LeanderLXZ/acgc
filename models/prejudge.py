@@ -1,6 +1,6 @@
 import time
 import numpy as np
-from models import models
+from models import classifiers
 from models import utils
 from models.cross_validation import CrossValidation
 
@@ -75,8 +75,8 @@ class PrejudgeBinary:
         """
             Initialize model for era prejudging
         """
-        LGB_E = models.LightGBM(self.x_g_train, era_sign_train, self.w_train, self.e_train,
-                                self.x_g_test, self.id_test, num_boost_round=self.num_boost_round_e)
+        LGB_E = classifiers.LightGBM(self.x_g_train, era_sign_train, self.w_train, self.e_train,
+                                     self.x_g_test, self.id_test, num_boost_round=self.num_boost_round_e)
         # XGB_E = models.XGBoost(self.x_train, era_sign_train, self.w_train, self.e_train,
         #                        self.x_test, self.id_test, num_boost_round=self.num_boost_round_e)
         # DNN_E = models.DeepNeuralNetworks(self.x_train, era_sign_train, self.w_train,
@@ -90,8 +90,8 @@ class PrejudgeBinary:
         """
             Initialize model for positive eras
         """
-        LGB_P = models.LightGBM(self.x_g_train_p, self.y_train_p, self.w_train_p, self.e_train_p,
-                                x_g_test_p, id_test_p, num_boost_round=self.num_boost_round_p)
+        LGB_P = classifiers.LightGBM(self.x_g_train_p, self.y_train_p, self.w_train_p, self.e_train_p,
+                                     x_g_test_p, id_test_p, num_boost_round=self.num_boost_round_p)
         # XGB_P = models.XGBoost(self.x_train_p, self.y_train_p, self.w_train_p, self.e_train_p,
         #                        x_test_p, id_test_p, num_boost_round=self.num_boost_round_p)
         # DNN_P = models.DeepNeuralNetworks(self.x_train_p, self.y_train_p, self.w_train_p,
@@ -105,8 +105,8 @@ class PrejudgeBinary:
         """
             Initialize model for negative eras
         """
-        LGB_N = models.LightGBM(self.x_g_train_n, self.y_train_n, self.w_train_n, self.e_train_n,
-                                x_g_test_n, id_test_n, num_boost_round=self.num_boost_round_n)
+        LGB_N = classifiers.LightGBM(self.x_g_train_n, self.y_train_n, self.w_train_n, self.e_train_n,
+                                     x_g_test_n, id_test_n, num_boost_round=self.num_boost_round_n)
         # XGB_N = models.XGBoost(self.x_train_n, self.y_train_n, self.w_train_n, self.e_train_n,
         #                        x_test_n, id_test_n, num_boost_round=self.num_boost_round_n)
         # DNN_N = models.DeepNeuralNetworks(self.x_train_n, self.y_train_n, self.w_train_n,
@@ -332,8 +332,8 @@ class PrejudgeMultiClass:
         """
             Initialize model for era prejudging
         """
-        LGB_E = models.LightGBM(self.x_g_train, e_train, self.w_train, self.e_train,
-                                self.x_g_test, self.id_test, num_boost_round=self.num_boost_round_e)
+        LGB_E = classifiers.LightGBM(self.x_g_train, e_train, self.w_train, self.e_train,
+                                     self.x_g_test, self.id_test, num_boost_round=self.num_boost_round_e)
         # XGB_E = models.XGBoost(self.x_train, e_train, self.w_train, self.e_train,
         #                        self.x_test, self.id_test, num_boost_round=self.num_boost_round_e)
         # DNN_E = models.DeepNeuralNetworks(self.x_train, e_train, self.w_train,
@@ -348,8 +348,8 @@ class PrejudgeMultiClass:
         """
             Initialize model for positive eras
         """
-        LGB_M = models.LightGBM(x_g_train_era, y_train_era, w_train_era, e_train_era,
-                                x_g_test_era, id_test_era, num_boost_round=self.num_boost_round_m)
+        LGB_M = classifiers.LightGBM(x_g_train_era, y_train_era, w_train_era, e_train_era,
+                                     x_g_test_era, id_test_era, num_boost_round=self.num_boost_round_m)
         # XGB_M = models.XGBoost(x_train_era, y_train_era, w_train_era, e_train_era,
         #                        x_test_era, id_test_era, num_boost_round=self.num_boost_round_m)
         # DNN_M = models.DeepNeuralNetworks(x_train_era, y_train_era, w_train_era, e_train_era,
