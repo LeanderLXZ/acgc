@@ -56,8 +56,11 @@ class SingleModel:
 
         self.x_train, self.y_train, self.w_train, self.e_train, self.x_test, self.id_test = \
             utils.load_preprocessed_data(preprocessed_data_path)
-        self.x_g_train, self.x_g_test = \
-            utils.load_preprocessed_data_g(preprocessed_data_path)
+        if preprocess.group_list is not None:
+            self.x_g_train, self.x_g_test = \
+                utils.load_preprocessed_data_g(preprocessed_data_path)
+        else:
+            self.x_g_train, self.x_g_test = self.x_train, self.x_test
 
         if train_args['use_global_valid']:
             self.x_gl_valid, self.x_g_gl_valid, self.y_gl_valid, self.w_gl_valid, self.e_gl_valid = \
@@ -1061,7 +1064,10 @@ class SKGridSearch:
         _log_path = grid_search_log_path + 'lgb_'
 
         x_train, y_train, w_train, e_train, x_test, id_test = utils.load_preprocessed_data(preprocessed_data_path)
-        x_g_train, x_g_test = utils.load_preprocessed_data_g(preprocessed_data_path)
+        if preprocess.group_list is not None:
+            x_g_train, x_g_test = utils.load_preprocessed_data_g(preprocessed_data_path)
+        else:
+            x_g_train, x_g_test = x_train, x_test
 
         parameters = {'learning_rate': 0.006,
                       'boosting_type': 'gbdt',        # traditional Gradient Boosting Decision Tree.
@@ -1187,8 +1193,11 @@ class PrejudgeTraining:
         
         self.x_train, self.y_train, self.w_train, self.e_train, self.x_test, self.id_test\
             = utils.load_preprocessed_data(preprocessed_data_path)
-        self.x_g_train, self.x_g_test\
-            = utils.load_preprocessed_data_g(preprocessed_data_path)
+        if preprocess.group_list is not None:
+            self.x_g_train, self.x_g_test = \
+                utils.load_preprocessed_data_g(preprocessed_data_path)
+        else:
+            self.x_g_train, self.x_g_test = self.x_train, self.x_test
         self.x_train_p, self.y_train_p, self.w_train_p, self.e_train_p, self.x_g_train_p \
             = utils.load_preprocessed_positive_data(preprocessed_data_path)
         self.x_train_n, self.y_train_n, self.w_train_n, self.e_train_n, self.x_g_train_n \
@@ -1402,8 +1411,11 @@ class ModelStacking:
 
         self.x_train, self.y_train, self.w_train, self.e_train, self.x_test, self.id_test\
             = utils.load_preprocessed_data(preprocessed_data_path)
-        self.x_g_train, self.x_g_test\
-            = utils.load_preprocessed_data_g(preprocessed_data_path)
+        if preprocess.group_list is not None:
+            self.x_g_train, self.x_g_test = \
+                utils.load_preprocessed_data_g(preprocessed_data_path)
+        else:
+            self.x_g_train, self.x_g_test = self.x_train, self.x_test
 
         # Choose Useful features
         if reduced_feature_list is not None:

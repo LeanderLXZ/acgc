@@ -16,7 +16,7 @@ positive_era_list = [0, 1, 5, 6, 8, 10, 12, 13, 14, 16, 17, 18, 19]
 merge_era_range_list = [(0, 5), (6, 11), (12, 17), (18, 23), (24, 29), (30, 35), (36, 41),
                         (42, 47), (48, 53), (54, 59), (60, 65), (66, 71), (72, 77), (78, 83),
                         (84, 89), (90, 95), (96, 101), (102, 107), (108, 113), (114, 118)]
-group_list = [1, 2]
+group_list = None  # Should be a list
 drop_feature_list = None
 
 
@@ -82,6 +82,10 @@ class DataPreProcess:
         self.split_data_by_gan_ = split_data_by_gan
         self.split_data_by_era_ = split_data_by_era
 
+        if group_list is None:
+            if use_group_list is not None:
+                raise ValueError("Groups Not Found!")
+
         if use_group_list is not None:
             self.g_train = pd.DataFrame()
             self.g_test = pd.DataFrame()
@@ -120,7 +124,8 @@ class DataPreProcess:
             print('------------------------------------------------------')
             print('Dropping Features:\n\t', self.drop_feature_list)
 
-        self.drop_feature_list.extend(['group' + str(g) for g in group_list])
+        if group_list is not None:
+            self.drop_feature_list.extend(['group' + str(g) for g in group_list])
 
         # Drop Unnecessary Columns
         self.x_train = train_f.drop(['id', 'weight', 'label', 'era', 'code_id', *self.drop_feature_list], axis=1)
@@ -527,7 +532,6 @@ class DataPreProcess:
 
         # Validation Set
         self.x_valid = self.x_train[valid_index]
-        self.x_g_valid = self.x_g_train[valid_index]
         self.y_valid = self.y_train[valid_index]
         self.w_valid = self.w_train[valid_index]
         self.e_valid = self.e_train[valid_index]
@@ -535,11 +539,14 @@ class DataPreProcess:
 
         # Train Set
         self.x_train = self.x_train[train_index]
-        self.x_g_train = self.x_g_train[train_index]
         self.y_train = self.y_train[train_index]
         self.w_train = self.w_train[train_index]
         self.e_train = self.e_train[train_index]
         self.code_id_train = self.code_id_train[train_index]
+
+        if group_list is not None:
+            self.x_g_valid = self.x_g_train[valid_index]
+            self.x_g_train = self.x_g_train[train_index]
 
     # Split Adversarial Validation Set by GAN
     def split_data_by_gan(self, load_pickle=True, sample_ratio=None, sample_by_era=True, generate_mode='valid'):
@@ -616,15 +623,17 @@ class DataPreProcess:
 
         # Generate Validation Set
         self.x_valid = self.x_train[valid_idx]
-        self.x_g_valid = self.x_g_train[valid_idx]
         self.y_valid = self.x_train[valid_idx]
 
         # Generate Training Set
         self.x_train = self.x_train[train_idx]
-        self.x_g_train = self.x_g_train[train_idx]
         self.y_train = self.y_train[train_idx]
         self.w_train = self.w_train[train_idx]
         self.e_train = self.e_train[train_idx]
+
+        if group_list is not None:
+            self.x_g_valid = self.x_g_train[valid_idx]
+            self.x_g_train = self.x_g_train[train_idx]
 
         # Save Adversarial Validation Set
         print('Saving Adversarial Validation Set...')
@@ -651,17 +660,19 @@ class DataPreProcess:
 
         # Positive Data
         self.x_train_p = self.x_train[positive_index]
-        self.x_g_train_p = self.x_g_train[positive_index]
         self.y_train_p = self.y_train[positive_index]
         self.w_train_p = self.w_train[positive_index]
         self.e_train_p = self.e_train[positive_index]
 
         # Negative Data
         self.x_train_n = self.x_train[negative_index]
-        self.x_g_train_n = self.x_g_train[negative_index]
         self.y_train_n = self.y_train[negative_index]
         self.w_train_n = self.w_train[negative_index]
         self.e_train_n = self.e_train[negative_index]
+
+        if group_list is not None:
+            self.x_g_train_p = self.x_g_train[positive_index]
+            self.x_g_train_n = self.x_g_train[negative_index]
 
     # Generate Validation Set for Forward Window
     def generate_valid_for_forward_window(self, n_valid_per_window=None, valid_rate=None, n_cv=None, window_size=None, n_era=None):
@@ -697,11 +708,13 @@ class DataPreProcess:
 
         # Validation Set
         self.x_valid = self.x_train[valid_index]
-        self.x_g_valid = self.x_g_train[valid_index]
         self.y_valid = self.y_train[valid_index]
         self.w_valid = self.w_train[valid_index]
         self.e_valid = self.e_train[valid_index]
         self.code_id_valid = self.code_id_train[valid_index]
+
+        if group_list is not None:
+            self.x_valid = self.x_train[valid_index]
 
     # Save Data
     def save_data(self):
@@ -709,15 +722,17 @@ class DataPreProcess:
         print('======================================================')
         print('Saving Preprocessed Data...')
         utils.save_data_to_pkl(self.x_train, self.preprocess_path + 'x_train.p')
-        utils.save_data_to_pkl(self.x_g_train, self.preprocess_path + 'x_g_train.p')
         utils.save_data_to_pkl(self.y_train, self.preprocess_path + 'y_train.p')
         utils.save_data_to_pkl(self.w_train, self.preprocess_path + 'w_train.p')
         utils.save_data_to_pkl(self.e_train, self.preprocess_path + 'e_train.p')
         utils.save_data_to_pkl(self.code_id_train, self.preprocess_path + 'code_id_train.p')
         utils.save_data_to_pkl(self.x_test, self.preprocess_path + 'x_test.p')
-        utils.save_data_to_pkl(self.x_g_test, self.preprocess_path + 'x_g_test.p')
         utils.save_data_to_pkl(self.id_test, self.preprocess_path + 'id_test.p')
         utils.save_data_to_pkl(self.code_id_test, self.preprocess_path + 'code_id_test.p')
+
+        if group_list is not None:
+            utils.save_data_to_pkl(self.x_g_train, self.preprocess_path + 'x_g_train.p')
+            utils.save_data_to_pkl(self.x_g_test, self.preprocess_path + 'x_g_test.p')
 
     # Save Validation Set
     def save_global_valid_set(self):
@@ -725,11 +740,13 @@ class DataPreProcess:
         print('======================================================')
         print('Saving Validation Set...')
         utils.save_data_to_pkl(self.x_valid, self.preprocess_path + 'x_global_valid.p')
-        utils.save_data_to_pkl(self.x_g_valid, self.preprocess_path + 'x_g_global_valid.p')
         utils.save_data_to_pkl(self.y_valid, self.preprocess_path + 'y_global_valid.p')
         utils.save_data_to_pkl(self.w_valid, self.preprocess_path + 'w_global_valid.p')
         utils.save_data_to_pkl(self.e_valid, self.preprocess_path + 'e_global_valid.p')
         utils.save_data_to_pkl(self.code_id_valid, self.preprocess_path + 'code_id_global_valid.p')
+
+        if group_list is not None:
+            utils.save_data_to_pkl(self.x_g_valid, self.preprocess_path + 'x_g_global_valid.p')
 
     # Save Data Split by Era Distribution
     def save_data_by_era_distribution_pd(self):
@@ -740,7 +757,6 @@ class DataPreProcess:
         # Positive Data
         print('Saving Positive Data...')
         utils.save_data_to_pkl(self.x_train_p, self.preprocess_path + 'x_train_p.p')
-        utils.save_data_to_pkl(self.x_g_train_p, self.preprocess_path + 'x_g_train_p.p')
         utils.save_data_to_pkl(self.y_train_p, self.preprocess_path + 'y_train_p.p')
         utils.save_data_to_pkl(self.w_train_p, self.preprocess_path + 'w_train_p.p')
         utils.save_data_to_pkl(self.e_train_p, self.preprocess_path + 'e_train_p.p')
@@ -748,10 +764,13 @@ class DataPreProcess:
         # Negative Data
         print('Saving Negative Data...')
         utils.save_data_to_pkl(self.x_train_n, self.preprocess_path + 'x_train_n.p')
-        utils.save_data_to_pkl(self.x_g_train_n, self.preprocess_path + 'x_g_train_n.p')
         utils.save_data_to_pkl(self.y_train_n, self.preprocess_path + 'y_train_n.p')
         utils.save_data_to_pkl(self.w_train_n, self.preprocess_path + 'w_train_n.p')
         utils.save_data_to_pkl(self.e_train_n, self.preprocess_path + 'e_train_n.p')
+
+        if group_list is not None:
+            utils.save_data_to_pkl(self.x_g_train_p, self.preprocess_path + 'x_g_train_p.p')
+            utils.save_data_to_pkl(self.x_g_train_n, self.preprocess_path + 'x_g_train_n.p')
 
     # Preprocess
     def preprocess(self):
@@ -788,7 +807,8 @@ class DataPreProcess:
             self.add_polynomial_features()
 
         # Convert column 'group' to dummies
-        self.convert_group_to_dummies(add_train_dummies=self.add_train_dummies_)
+        if group_list is not None:
+            self.convert_group_to_dummies(add_train_dummies=self.add_train_dummies_)
 
         # Spilt Validation Set by valid_rate
         if self.use_global_valid_:
@@ -826,7 +846,7 @@ if __name__ == '__main__':
     utils.check_dir(['./data/', preprocessed_path])
 
     preprocess_args = {'merge_eras': False,
-                       'use_group_list': [1],
+                       'use_group_list': None,  # Should be a list
                        'add_train_dummies': False,
                        'use_global_valid': False,
                        'generate_valid_for_fw': False,

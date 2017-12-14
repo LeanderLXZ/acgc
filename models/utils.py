@@ -919,6 +919,27 @@ def get_grid_search_log_path(csv_log_path, model_name, param_name_list, param_va
     return csv_log_path, param_name, param_info
 
 
+# Get Category Feature's Index
+def get_idx_category(x_train, use_multi_group):
+
+    if preprocess.group_list is not None:
+        if use_multi_group:
+            print('------------------------------------------------------')
+            print('[W] Using Multi Groups...')
+            idx_category = [x_train.shape[1] - 2, x_train.shape[1] - 1]
+        else:
+            print('------------------------------------------------------')
+            print('[W] Using Single Group...')
+            idx_category = [x_train.shape[1] - 1]
+        print('------------------------------------------------------')
+        print('Index of categorical feature: {}'.format(idx_category))
+        print('------------------------------------------------------')
+    else:
+        idx_category = None
+
+    return idx_category
+
+
 # Get Simple Parameter's Name
 def get_simple_param_name(param_name):
 

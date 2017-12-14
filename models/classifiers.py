@@ -2,6 +2,7 @@ import sys
 import re
 import time
 import copy
+import preprocess
 import numpy as np
 from models import utils
 from models.cross_validation import CrossValidation
@@ -50,6 +51,10 @@ class ModelBase(object):
         self.use_custom_obj = False
         self.postscale = False
         self.postscale_rate = None
+
+        if preprocess.group_list is None:
+            if not use_multi_group:
+                raise ValueError("Groups not found! 'use_multi_group' should be False!")
 
     @staticmethod
     def get_clf(parameters):
@@ -1282,18 +1287,8 @@ class LightGBM(ModelBase):
 
     def fit(self, x_train, y_train, w_train, x_valid, y_valid, w_valid, parameters=None):
 
-        # Create Dataset
-        if self.use_multi_group:
-            print('------------------------------------------------------')
-            print('[W] Using Multi Groups...')
-            idx_category = [x_train.shape[1] - 2, x_train.shape[1] - 1]
-        else:
-            print('------------------------------------------------------')
-            print('[W] Using Single Group...')
-            idx_category = [x_train.shape[1] - 1]
-        print('------------------------------------------------------')
-        print('Index of categorical feature: {}'.format(idx_category))
-        print('------------------------------------------------------')
+        # Get Category Feature's Index
+        idx_category = utils.get_idx_category(x_train, self.use_multi_group)
 
         d_train = lgb.Dataset(x_train, label=y_train, weight=w_train, categorical_feature=idx_category)
         d_valid = lgb.Dataset(x_valid, label=y_valid, weight=w_valid, categorical_feature=idx_category)
@@ -1323,17 +1318,8 @@ class LightGBM(ModelBase):
 
     def prejudge_fit(self, x_train, y_train, w_train, x_valid, y_valid, w_valid, parameters=None, use_weight=True):
 
-        if self.use_multi_group:
-            print('------------------------------------------------------')
-            print('[W] Using Multi Groups...')
-            idx_category = [x_train.shape[1] - 2, x_train.shape[1] - 1]
-        else:
-            print('------------------------------------------------------')
-            print('[W] Using Single Group...')
-            idx_category = [x_train.shape[1] - 1]
-        print('------------------------------------------------------')
-        print('Index of categorical feature: {}'.format(idx_category))
-        print('------------------------------------------------------')
+        # Get Category Feature's Index
+        idx_category = utils.get_idx_category(x_train, self.use_multi_group)
 
         if use_weight:
             d_train = lgb.Dataset(x_train, label=y_train, weight=w_train, categorical_feature=idx_category)
@@ -1432,9 +1418,8 @@ class LightGBM(ModelBase):
             print('======================================================')
             print('Training on the Cross Validation Set: {}/{}'.format(cv_counter, n_cv))
 
-            idx_category = [x_train.shape[1] - 2, x_train.shape[1] - 1]
-            print('Index of categorical feature: {}'.format(idx_category))
-            print('------------------------------------------------------')
+            # Get Category Feature's Index
+            idx_category = utils.get_idx_category(x_train, self.use_multi_group)
 
             if use_weight:
                 d_train = lgb.Dataset(x_train, label=y_train, weight=w_train, categorical_feature=idx_category)
@@ -1492,15 +1477,8 @@ class SKLearnLightGBM(ModelBase):
         # Get Classifier
         clf = self.get_clf(parameters)
 
-        if self.use_multi_group:
-            print('------------------------------------------------------')
-            print('[W] Using Multi Groups...')
-            idx_category = [x_train.shape[1] - 2, x_train.shape[1] - 1]
-        else:
-            print('------------------------------------------------------')
-            print('[W] Using Single Group...')
-            idx_category = [x_train.shape[1] - 1]
-        print('Index of categorical feature: {}'.format(idx_category))
+        # Get Category Feature's Index
+        idx_category = utils.get_idx_category(x_train, self.use_multi_group)
 
         # Fitting and Training Model
         clf.fit(x_train, y_train, sample_weight=w_train, categorical_feature=idx_category,
@@ -1539,17 +1517,8 @@ class CatBoost(ModelBase):
         # Get Classifier
         clf = self.get_clf(parameters)
 
-        if self.use_multi_group:
-            print('------------------------------------------------------')
-            print('[W] Using Multi Groups...')
-            idx_category = [x_train.shape[1] - 2, x_train.shape[1] - 1]
-        else:
-            print('------------------------------------------------------')
-            print('[W] Using Single Group...')
-            idx_category = [x_train.shape[1] - 1]
-        print('------------------------------------------------------')
-        print('Index of categorical feature: {}'.format(idx_category))
-        print('------------------------------------------------------')
+        # Get Category Feature's Index
+        idx_category = utils.get_idx_category(x_train, self.use_multi_group)
 
         # Convert Zeros in Weights to Small Positive Numbers
         w_train = [0.001 if w == 0 else w for w in w_train]
@@ -1565,17 +1534,8 @@ class CatBoost(ModelBase):
         # Get Classifier
         clf = self.get_clf(parameters)
 
-        if self.use_multi_group:
-            print('------------------------------------------------------')
-            print('[W] Using Multi Groups...')
-            idx_category = [x_train.shape[1] - 2, x_train.shape[1] - 1]
-        else:
-            print('------------------------------------------------------')
-            print('[W] Using Single Group...')
-            idx_category = [x_train.shape[1] - 1]
-        print('------------------------------------------------------')
-        print('Index of categorical feature: {}'.format(idx_category))
-        print('------------------------------------------------------')
+        # Get Category Feature's Index
+        idx_category = utils.get_idx_category(x_train, self.use_multi_group)
 
         # Convert Zeros in Weights to Small Positive Numbers
         w_train = [0.001 if w == 0 else w for w in w_train]
