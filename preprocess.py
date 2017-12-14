@@ -135,7 +135,7 @@ class DataPreProcess:
         self.y_train = train_f['label']
         self.w_train = train_f['weight']
         self.e_train = train_f['era']
-        self.x_test = test_f.drop(['index', *self.drop_feature_list], axis=1)
+        self.x_test = test_f.drop(['index', 'date', *self.drop_feature_list], axis=1)
         self.id_test = test_f['index']
         if self.use_code_id:
             self.code_id_train = train_f['code_id']

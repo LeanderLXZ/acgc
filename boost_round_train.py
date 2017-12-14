@@ -327,17 +327,17 @@ class Training:
                    ]
         train_seed_list = [999]
         cv_seed_list = [95]
-        # TM.auto_train_boost_round('xgb', num_boost_round=100, n_epoch=1, full_grid_search=True,
-        #                           use_multi_group=False, train_seed_list=train_seed_list, cv_seed_list=cv_seed_list,
-        #                           base_parameters=base_parameters, parameter_grid_list=pg_list, save_final_pred=False,
-        #                           reduced_feature_list=reduced_feature_list, train_args=train_args, cv_args=cv_args)
+        TM.auto_train_boost_round('xgb', num_boost_round=100, n_epoch=1, full_grid_search=True,
+                                  use_multi_group=False, train_seed_list=train_seed_list, cv_seed_list=cv_seed_list,
+                                  base_parameters=base_parameters, parameter_grid_list=pg_list, save_final_pred=False,
+                                  reduced_feature_list=reduced_feature_list, train_args=train_args, cv_args=cv_args)
 
-        """Train Different Rounds"""
-        num_boost_round_list = [83, 85, 87]
-        self.train_diff_round('xgb', TM, num_boost_round_list=num_boost_round_list, n_epoch=1, full_grid_search=True,
-                              use_multi_group=False, train_seed_list=train_seed_list, cv_seed_list=cv_seed_list,
-                              base_parameters=base_parameters, parameter_grid_list=pg_list, save_final_pred=True,
-                              reduced_feature_list=reduced_feature_list, train_args=train_args, cv_args=cv_args)
+        # """Train Different Rounds"""
+        # num_boost_round_list = [83, 85, 87]
+        # self.train_diff_round('xgb', TM, num_boost_round_list=num_boost_round_list, n_epoch=1, full_grid_search=True,
+        #                       use_multi_group=False, train_seed_list=train_seed_list, cv_seed_list=cv_seed_list,
+        #                       base_parameters=base_parameters, parameter_grid_list=pg_list, save_final_pred=True,
+        #                       reduced_feature_list=reduced_feature_list, train_args=train_args, cv_args=cv_args)
 
 
 if __name__ == "__main__":
