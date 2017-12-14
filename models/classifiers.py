@@ -53,7 +53,7 @@ class ModelBase(object):
         self.postscale_rate = None
 
         if preprocess.group_list is None:
-            if not use_multi_group:
+            if use_multi_group:
                 raise ValueError("Groups not found! 'use_multi_group' should be False!")
 
     @staticmethod
