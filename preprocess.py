@@ -16,16 +16,16 @@ positive_era_list = [0, 1, 5, 6, 8, 10, 12, 13, 14, 16, 17, 18, 19]
 merge_era_range_list = [(0, 5), (6, 11), (12, 17), (18, 23), (24, 29), (30, 35), (36, 41),
                         (42, 47), (48, 53), (54, 59), (60, 65), (66, 71), (72, 77), (78, 83),
                         (84, 89), (90, 95), (96, 101), (102, 107), (108, 113), (114, 118)]
-group_list = None  # Should be a list
-drop_feature_list = None
+group_list = None  # Should be a list or None
+drop_feature_list = [9]
 
 
 class DataPreProcess:
 
-    def __init__(self, train_path, test_path, preprocess_path, use_group_list=None, add_train_dummies=False,
-                 merge_eras=False, use_global_valid=False, global_valid_rate=None, drop_outliers_by_value=False,
-                 drop_outliers_by_quantile=False, standard_scale=False, min_max_scale=False,
-                 add_polynomial_features=False, generate_valid_for_fw=False,
+    def __init__(self, train_path, test_path, preprocess_path, use_group_list=None, use_code_id=False,
+                 add_train_dummies=False, merge_eras=False, use_global_valid=False, global_valid_rate=None,
+                 drop_outliers_by_value=False, drop_outliers_by_quantile=False, standard_scale=False,
+                 min_max_scale=False, add_polynomial_features=False, generate_valid_for_fw=False,
                  split_data_by_gan=False, split_data_by_era=False):
 
         self.train_path = train_path
@@ -67,6 +67,7 @@ class DataPreProcess:
         self.code_id_valid = np.array([])
 
         self.use_group_list = use_group_list
+        self.use_code_id = use_code_id
         self.add_train_dummies_ = add_train_dummies
         self.drop_feature_list = []
         self.merge_era_range_list = merge_era_range_list
@@ -126,16 +127,19 @@ class DataPreProcess:
 
         if group_list is not None:
             self.drop_feature_list.extend(['group' + str(g) for g in group_list])
+        if self.use_code_id:
+            self.drop_feature_list.append('code_id')
 
         # Drop Unnecessary Columns
-        self.x_train = train_f.drop(['id', 'weight', 'label', 'era', 'code_id', *self.drop_feature_list], axis=1)
+        self.x_train = train_f.drop(['index', 'weight', 'label', 'era', 'date', *self.drop_feature_list], axis=1)
         self.y_train = train_f['label']
         self.w_train = train_f['weight']
-        self.code_id_train = train_f['code_id']
         self.e_train = train_f['era']
-        self.x_test = test_f.drop(['id', 'code_id', *self.drop_feature_list], axis=1)
-        self.id_test = test_f['id']
-        self.code_id_test = test_f['code_id']
+        self.x_test = test_f.drop(['id', *self.drop_feature_list], axis=1)
+        self.id_test = test_f['index']
+        if self.use_code_id:
+            self.code_id_train = train_f['code_id']
+            self.code_id_test = test_f['code_id']
 
         print('------------------------------------------------------')
         print('Train Features: {}\n'.format(self.x_train.shape[1]),
@@ -442,10 +446,11 @@ class DataPreProcess:
         self.y_train = np.array(self.y_train, dtype=np.float64)
         self.w_train = np.array(self.w_train, dtype=np.float64)
         self.e_train = np.array(self.e_train, dtype=int)
-        self.code_id_train = np.array(self.code_id_train, dtype=int)
         self.x_test = np.array(self.x_test, dtype=np.float64)
         self.id_test = np.array(self.id_test, dtype=int)
-        self.code_id_test = np.array(self.code_id_test, dtype=int)
+        if self.use_code_id:
+            self.code_id_train = np.array(self.code_id_train, dtype=int)
+            self.code_id_test = np.array(self.code_id_test, dtype=int)
 
     # Add Polynomial Features
     def add_polynomial_features(self):
@@ -535,18 +540,19 @@ class DataPreProcess:
         self.y_valid = self.y_train[valid_index]
         self.w_valid = self.w_train[valid_index]
         self.e_valid = self.e_train[valid_index]
-        self.code_id_valid = self.code_id_train[valid_index]
 
         # Train Set
         self.x_train = self.x_train[train_index]
         self.y_train = self.y_train[train_index]
         self.w_train = self.w_train[train_index]
         self.e_train = self.e_train[train_index]
-        self.code_id_train = self.code_id_train[train_index]
 
         if group_list is not None:
             self.x_g_valid = self.x_g_train[valid_index]
             self.x_g_train = self.x_g_train[train_index]
+        if self.use_code_id:
+            self.code_id_valid = self.code_id_train[valid_index]
+            self.code_id_train = self.code_id_train[train_index]
 
     # Split Adversarial Validation Set by GAN
     def split_data_by_gan(self, load_pickle=True, sample_ratio=None, sample_by_era=True, generate_mode='valid'):
@@ -711,10 +717,11 @@ class DataPreProcess:
         self.y_valid = self.y_train[valid_index]
         self.w_valid = self.w_train[valid_index]
         self.e_valid = self.e_train[valid_index]
-        self.code_id_valid = self.code_id_train[valid_index]
 
         if group_list is not None:
             self.x_valid = self.x_train[valid_index]
+        if self.use_code_id:
+            self.code_id_valid = self.code_id_train[valid_index]
 
     # Save Data
     def save_data(self):
@@ -725,14 +732,15 @@ class DataPreProcess:
         utils.save_data_to_pkl(self.y_train, self.preprocess_path + 'y_train.p')
         utils.save_data_to_pkl(self.w_train, self.preprocess_path + 'w_train.p')
         utils.save_data_to_pkl(self.e_train, self.preprocess_path + 'e_train.p')
-        utils.save_data_to_pkl(self.code_id_train, self.preprocess_path + 'code_id_train.p')
         utils.save_data_to_pkl(self.x_test, self.preprocess_path + 'x_test.p')
         utils.save_data_to_pkl(self.id_test, self.preprocess_path + 'id_test.p')
-        utils.save_data_to_pkl(self.code_id_test, self.preprocess_path + 'code_id_test.p')
 
         if group_list is not None:
             utils.save_data_to_pkl(self.x_g_train, self.preprocess_path + 'x_g_train.p')
             utils.save_data_to_pkl(self.x_g_test, self.preprocess_path + 'x_g_test.p')
+        if self.use_code_id:
+            utils.save_data_to_pkl(self.code_id_train, self.preprocess_path + 'code_id_train.p')
+            utils.save_data_to_pkl(self.code_id_test, self.preprocess_path + 'code_id_test.p')
 
     # Save Validation Set
     def save_global_valid_set(self):
@@ -743,10 +751,11 @@ class DataPreProcess:
         utils.save_data_to_pkl(self.y_valid, self.preprocess_path + 'y_global_valid.p')
         utils.save_data_to_pkl(self.w_valid, self.preprocess_path + 'w_global_valid.p')
         utils.save_data_to_pkl(self.e_valid, self.preprocess_path + 'e_global_valid.p')
-        utils.save_data_to_pkl(self.code_id_valid, self.preprocess_path + 'code_id_global_valid.p')
 
         if group_list is not None:
             utils.save_data_to_pkl(self.x_g_valid, self.preprocess_path + 'x_g_global_valid.p')
+        if self.use_code_id:
+            utils.save_data_to_pkl(self.code_id_valid, self.preprocess_path + 'code_id_global_valid.p')
 
     # Save Data Split by Era Distribution
     def save_data_by_era_distribution_pd(self):
@@ -846,7 +855,8 @@ if __name__ == '__main__':
     utils.check_dir(['./data/', preprocessed_path])
 
     preprocess_args = {'merge_eras': False,
-                       'use_group_list': None,  # Should be a list
+                       'use_code_id': False,
+                       'use_group_list': None,  # Should be a list or None
                        'add_train_dummies': False,
                        'use_global_valid': False,
                        'generate_valid_for_fw': False,
