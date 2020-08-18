@@ -49,7 +49,7 @@ def save_grid_search_log(log_path, params, params_grid, best_score, best_paramet
 
         f.write('=====================================================\n')
         f.write('Time: {}\n'.format(local_time))
-        f.write('------------------------------------------------------')
+        f.write('------------------------------------------------------\n')
         f.write('Total Time: {:.3f}s\n'.format(total_time))
         f.write('Best Score: {:.8f}\n'.format(best_score))
         f.write('Parameters:\n')
@@ -75,7 +75,7 @@ def save_loss_log(log_path, count, parameters, n_valid, n_cv, valid_era, loss_tr
 
         f.write('===================== CV: {}/{} =====================\n'.format(count, n_cv))
         f.write('Time: {}\n'.format(local_time))
-        f.write('------------------------------------------------------')
+        f.write('------------------------------------------------------\n')
         f.write('Train Seed: {}\n'.format(train_seed))
         f.write('CV Seed: {}\n'.format(cv_seed))
         f.write('Validation Era Number: {}\n'.format(n_valid))
@@ -110,7 +110,7 @@ def save_final_loss_log(log_path, parameters, n_valid, n_cv, loss_train_mean,
 
         f.write('==================== Final Losses ===================\n')
         f.write('Time: {}\n'.format(local_time))
-        f.write('------------------------------------------------------')
+        f.write('------------------------------------------------------\n')
         f.write('Train Seed: {}\n'.format(train_seed))
         f.write('CV Seed: {}\n'.format(cv_seed))
         f.write('Validation Era Number: {}\n'.format(n_valid))
@@ -136,7 +136,7 @@ def save_final_loss_log(log_path, parameters, n_valid, n_cv, loss_train_mean,
 
         f.write('=====================================================\n')
         f.write('Time: {}\n'.format(local_time))
-        f.write('------------------------------------------------------')
+        f.write('------------------------------------------------------\n')
         f.write('Train Seed: {}\n'.format(train_seed))
         f.write('CV Seed: {}\n'.format(cv_seed))
         f.write('Validation Era Number: {}\n'.format(n_valid))
